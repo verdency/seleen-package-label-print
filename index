@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <style>
+        @page { size: 50mm 30mm; margin: 0; }
+        
+        body { 
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0; padding: 0; 
+            display: flex; justify-content: center;
+            background: #f4f4f4;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .label {
+            width: 50mm; height: 30mm;
+            background: white;
+            position: relative;
+            overflow: hidden;
+            box-sizing: border-box;
+            padding: 0mm 1mm;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* --- DÒNG 1: MODEL & SIZE (ĐÃ SỬA) --- */
+        .row-1 {
+            display: flex;
+            justify-content: center; /* Đưa cả nhóm vào giữa */
+            align-items: center;
+            margin-bottom: 0mm;
+        }
+        .model-sku { font-size: 20pt; font-weight: 800; line-height: 1; }
+        .size-box { 
+            background: black; color: white;
+            width: 11mm; height: 10mm;
+            display: flex; justify-content: center; align-items: center;
+            font-size: 20pt; font-weight: 900;
+            margin-left: 1pt; /* Khoảng cách 1pt so với model-sku */
+        }
+
+        /* --- DÒNG 2: SKU & VARIANT --- */
+        .row-2 {
+            text-align: center;
+            font-size: 6pt;
+            margin-bottom: .5mm;
+            white-space: nowrap;
+        }
+        .variant-text { font-size: 4pt; font-weight: 700; }
+
+        /* --- VÙNG CHIA ĐÔI PHÍA DƯỚI --- */
+        .bottom-area {
+            display: flex;
+            flex: 1;
+            gap: .5mm;
+        }
+
+        /* Cột trái: Thông tin sản phẩm */
+        .left-col {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+        }
+
+        .product-name { 
+            font-size: 5pt; 
+            text-align: center; 
+            line-height: 1.1; 
+            margin-bottom: 1mm;
+            min-height: 4mm;
+        }
+
+        /* Khung số lượng và MO */
+        .info-box {
+            border: 0.1pt solid black;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        .info-row-top {
+            border-bottom: 0.1pt solid black;
+            font-size: 6pt;
+            text-align: center;
+            padding: 0.3mm 0;
+        }
+        .info-row-bottom {
+            font-size: 6pt;
+            text-align: center;
+            padding: 0.3mm 0;
+        }
+
+        .supplier { 
+            font-size: 4pt; 
+            font-style: italic; 
+            margin-top: 1mm;
+            text-align: center;
+        }
+
+        /* Cột phải: QR Code */
+        .right-col {
+            width: 13mm;
+            display: flex;
+            justify-content: flex-end;
+            align-items: flex-start;
+            padding-top: 1mm;
+        }
+
+        #qrcode img { display: block; }
+
+        @media print { 
+            body { background: none; }
+            -webkit-print-color-adjust: exact; 
+        }
+    </style>
+</head>
+<body>
+
+<div class="label">
+    <div class="row-1">
+        <div class="model-sku" id="model-sku">WB0193</div>
+        <div class="size-box" id="size">XL</div>
+    </div>
+
+    <div class="row-2">
+        <span id="sku">SE_WB0193_C228_L</span> – <span class="variant-text" id="variant">Bố Ruby - Xám đen</span>
+    </div>
+
+    <div class="bottom-area">
+        <div class="left-col">
+            <div class="product-name" id="product-name">Quần tây lưng cao ống suông chi tiết vạt (có thể tháo)</div>
+            
+            <div class="info-box">
+                <div class="info-row-top">
+                    <span id="quantity">11</span> | <span id="date">15/04/2026</span>
+                </div>
+                <div class="info-row-bottom" id="mo">SE-260330-0193-L16-FL1</div>
+            </div>
+
+            <div class="supplier" id="supplier">XUÂN KỶ - Q12</div>
+        </div>
+
+        <div class="right-col">
+            <div id="qrcode"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const params = new URLSearchParams(window.location.search);
+    
+    const fields = ['model-sku', 'size', 'sku', 'variant', 'product-name', 'quantity', 'date', 'mo', 'supplier'];
+
+    fields.forEach(field => {
+        if(params.has(field)) {
+            document.getElementById(field).innerText = params.get(field);
+        }
+    });
+
+    const qrValue = params.get('qr-code') || params.get('sku') || "SE_WB0193_C228_L";
+    new QRCode(document.getElementById("qrcode"), {
+        text: qrValue,
+        width: 46,
+        height: 46,
+        colorDark : "#000000",
+        colorLight : "#ffffff",
+        correctLevel : QRCode.CorrectLevel.M
+    });
+</script>
+
+</body>
+</html>
