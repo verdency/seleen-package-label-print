@@ -72,10 +72,10 @@
             min-height: 4mm;
         }
 
-/* --- XỬ LÝ ĐƯỜNG KẺ GIỮA SIÊU MẢNH --- */
+        /* --- CẤU HÌNH KHUNG VIỀN ĐÃ TĂNG ĐỘ ĐẬM --- */
         .info-box {
-            /* Sử dụng màu xám vừa phải để giảm độ nở mực khi in nhiệt */
-            box-shadow: 0 0 0 0.1px #666; 
+            /* Tăng từ 0.1px lên 0.5px và dùng màu đậm hơn (#333) */
+            box-shadow: 0 0 0 0.75px #400; 
             border: none;
             width: 100%;
             box-sizing: border-box;
@@ -84,7 +84,6 @@
         }
         
         .info-row-top {
-            /* Loại bỏ border-bottom truyền thống */
             border-bottom: none; 
             font-size: 6pt;
             text-align: center;
@@ -92,16 +91,15 @@
             position: relative;
         }
 
-        /* Tạo đường kẻ ngăn cách siêu mảnh bằng giả lập */
         .info-row-top::after {
             content: "";
             position: absolute;
             bottom: 0;
             left: 0;
             width: 100%;
-            /* Chỉ sử dụng 0.1px và màu nhạt hơn để máy in không bị đậm nét */
-            height: 1px; 
-            background-color: #888; 
+            /* Tăng độ dày đường kẻ giữa lên 0.5px */
+            height: 0.75px; 
+            background-color: #400; 
         }
 
         .info-row-bottom {
@@ -123,6 +121,7 @@
             justify-content: flex-end;
             align-items: flex-start;
             padding-top: 1mm;
+            margin-right: 0.5mm;
         }
 
         #qrcode {
@@ -137,13 +136,13 @@
                 -webkit-print-color-adjust: exact; 
             }
             
-            /* Ép máy in nhiệt sử dụng mức đốt thấp nhất cho đường kẻ */
+            /* Duy trì độ đậm khi in */
             .info-box {
-                box-shadow: 0 0 0 0.2pt #888 !important;
+                box-shadow: 0 0 0 0.5pt #000 !important;
             }
             .info-row-top::after {
                 height: 0.5pt !important;
-                background-color: #999 !important;
+                background-color: #000 !important;
             }
         }
     </style>
