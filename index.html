@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bwip-js@3.0.4/dist/bwip-js-min.js"></script>
     <style>
         @page { size: 50mm 30mm; margin: 0; }
         
@@ -25,23 +25,23 @@
             flex-direction: column;
         }
 
-        /* --- DÒNG 1: MODEL & SIZE (ĐÃ SỬA) --- */
         .row-1 {
             display: flex;
-            justify-content: center; /* Đưa cả nhóm vào giữa */
+            justify-content: center; 
             align-items: center;
             margin-bottom: 0mm;
         }
         .model-sku { font-size: 20pt; font-weight: 800; line-height: 1; }
         .size-box { 
-            background: black; color: white;
+            background: black !important; color: white !important;
             width: 11mm; height: 10mm;
             display: flex; justify-content: center; align-items: center;
             font-size: 20pt; font-weight: 900;
-            margin-left: 1pt; /* Khoảng cách 1pt so với model-sku */
+            margin-left: 1pt;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
         }
 
-        /* --- DÒNG 2: SKU & VARIANT --- */
         .row-2 {
             text-align: center;
             font-size: 6pt;
@@ -50,14 +50,12 @@
         }
         .variant-text { font-size: 4pt; font-weight: 700; }
 
-        /* --- VÙNG CHIA ĐÔI PHÍA DƯỚI --- */
         .bottom-area {
             display: flex;
             flex: 1;
             gap: .5mm;
         }
 
-        /* Cột trái: Thông tin sản phẩm */
         .left-col {
             flex: 1;
             display: flex;
@@ -74,18 +72,38 @@
             min-height: 4mm;
         }
 
-        /* Khung số lượng và MO */
+/* --- XỬ LÝ ĐƯỜNG KẺ GIỮA SIÊU MẢNH --- */
         .info-box {
-            border: 0.1pt solid black;
+            /* Sử dụng màu xám vừa phải để giảm độ nở mực khi in nhiệt */
+            box-shadow: 0 0 0 0.1px #666; 
+            border: none;
             width: 100%;
             box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
         }
+        
         .info-row-top {
-            border-bottom: 0.1pt solid black;
+            /* Loại bỏ border-bottom truyền thống */
+            border-bottom: none; 
             font-size: 6pt;
             text-align: center;
             padding: 0.3mm 0;
+            position: relative;
         }
+
+        /* Tạo đường kẻ ngăn cách siêu mảnh bằng giả lập */
+        .info-row-top::after {
+            content: "";
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            /* Chỉ sử dụng 0.1px và màu nhạt hơn để máy in không bị đậm nét */
+            height: 1px; 
+            background-color: #888; 
+        }
+
         .info-row-bottom {
             font-size: 6pt;
             text-align: center;
@@ -99,20 +117,34 @@
             text-align: center;
         }
 
-        /* Cột phải: QR Code */
         .right-col {
-            width: 13mm;
+            width: 15mm;
             display: flex;
             justify-content: flex-end;
             align-items: flex-start;
             padding-top: 1mm;
         }
 
-        #qrcode img { display: block; }
+        #qrcode {
+            width: 14mm;
+            height: 14mm;
+        }
 
         @media print { 
             body { background: none; }
-            -webkit-print-color-adjust: exact; 
+            .size-box { 
+                background-color: black !important; 
+                -webkit-print-color-adjust: exact; 
+            }
+            
+            /* Ép máy in nhiệt sử dụng mức đốt thấp nhất cho đường kẻ */
+            .info-box {
+                box-shadow: 0 0 0 0.2pt #888 !important;
+            }
+            .info-row-top::after {
+                height: 0.5pt !important;
+                background-color: #999 !important;
+            }
         }
     </style>
 </head>
@@ -131,26 +163,23 @@
     <div class="bottom-area">
         <div class="left-col">
             <div class="product-name" id="product-name">Quần tây lưng cao ống suông chi tiết vạt (có thể tháo)</div>
-            
             <div class="info-box">
                 <div class="info-row-top">
                     <span id="quantity">11</span> | <span id="date">15/04/2026</span>
                 </div>
                 <div class="info-row-bottom" id="mo">SE-260330-0193-L16-FL1</div>
             </div>
-
             <div class="supplier" id="supplier">XUÂN KỶ - Q12</div>
         </div>
 
         <div class="right-col">
-            <div id="qrcode"></div>
+            <canvas id="qrcode"></canvas>
         </div>
     </div>
 </div>
 
 <script>
     const params = new URLSearchParams(window.location.search);
-    
     const fields = ['model-sku', 'size', 'sku', 'variant', 'product-name', 'quantity', 'date', 'mo', 'supplier'];
 
     fields.forEach(field => {
@@ -160,14 +189,20 @@
     });
 
     const qrValue = params.get('qr-code') || params.get('sku') || "SE_WB0193_C228_L";
-    new QRCode(document.getElementById("qrcode"), {
-        text: qrValue,
-        width: 46,
-        height: 46,
-        colorDark : "#000000",
-        colorLight : "#ffffff",
-        correctLevel : QRCode.CorrectLevel.M
-    });
+
+    try {
+        bwipjs.toCanvas('qrcode', {
+            bcid:        'qrcode',
+            text:        qrValue,
+            scale:       5,
+            height:      15,
+            width:       15,
+            eclevel:     'L',
+            includetext: false,
+        });
+    } catch (e) {
+        console.error(e);
+    }
 </script>
 
 </body>
